@@ -1,0 +1,139 @@
+<script>
+lastValue = 0;
+function setDefault(value)
+{
+	lastValue = value;
+}
+
+function limitDecPlaces(temp,decPlaces,decPos)
+{
+	iPart = temp.substr(0, decPos);
+	dPart = temp.substr(decPos + 1);
+	if(dPart.length > decPlaces)
+	{
+		dPart = dPart.substr(0, decPlaces);
+	}
+	else if(dPart.length == decPlaces)
+	{
+		check = Number(dPart);
+		if(Number(iPart) == 0 && check == 0 && dPart.length == decPlaces)
+		{
+			ans = iPart;
+			return ans;
+		} 
+	}
+	ans = iPart + "." + dPart ;
+	return ans;
+}
+
+keyPressed = false;
+dotKeyPressed = false;
+function validateNumber(id,decPlaces)
+{
+	vid = document.getElementById(id);
+	
+	if(keyPressed)
+	{
+		if(vid.value != "")
+		{
+			min = Number(vid.min);
+			max = Number(vid.max);
+	
+			if( (vid.value == 0) || (vid.value >= min && vid.value <= max) )
+			{
+				temp = vid.value + "";
+				decPos = temp.indexOf("."); // when text is 0. then it is 0 not 0. hence indexOf value is -1
+				if(decPos > -1)
+				{
+					if(decPos != temp.length - 1)
+					{
+						vid.value = limitDecPlaces(temp, decPlaces, decPos);
+					}
+				}
+				if(dotKeyPressed == false && vid.value == 0) 
+				{
+					vid.value = Number(vid.value); // if text is 000000 then make 0 
+				}
+			}
+			else if(vid.value < min || vid.value > max)
+			{
+				vid.value = Number(lastValue);
+			}	
+		}
+		else
+		{
+			vid.value = Number(lastValue);
+		}
+		
+		lastValue = vid.value;
+	}
+	keyPressed = false;
+	dotKeyPressed = false;
+}
+
+function validateBBox(id,decPlaces)
+{
+	vid = document.getElementById(id);
+	if(keyPressed)
+	{
+		if(vid.value != "")
+		{
+			min = Number(vid.min);
+			max = Number(vid.max);
+	
+			if(vid.value >= min && vid.value <= max) 
+			{
+				temp = vid.value + "";
+				decPos = temp.indexOf("."); // when text is 1. then it is 1 not 1. hence indexOf value is -1
+				if(decPos > -1)
+				{
+					if(decPos != temp.length - 1)
+					{
+						vid.value = limitDecPlaces(temp, decPlaces, decPos);
+					}
+				}
+			}
+			else if(vid.value < min || vid.value > max)
+			{
+				vid.value = Number(lastValue);
+			}	
+		}
+		else
+		{
+			vid.value = Number(lastValue);
+		}
+		lastValue = vid.value;
+	}
+	keyPressed = false;
+}
+
+function setKPFlag(evt)
+{
+	keyPressed = true; // this is required to allow typing when input type number is blank or else last correct value is copied
+	if(evt.key == ".")
+		dotKeyPressed = true;
+	else if(!(evt.keyCode > 47 && evt.keyCode < 58))
+		return false;	
+}
+
+function ensureNumber(id, defVal)
+{
+	vid = document.getElementById(id);
+	min = Number(vid.min);
+	max = Number(vid.max);
+	
+	if(vid.value == "" || vid.value < min || vid.value > max)
+	{
+		value = Number(lastValue);
+		if(value != 0)
+			vid.value = value;
+		else
+			vid.value = Number(defVal);
+	}
+}
+
+</script>
+
+<input type="number" onkeyup="validateNumber(this.id,1)" min="0.1" max="1.0" step="0.1" onkeypress="return setKPFlag(event)" id="test" value="0.5" onfocus="setDefault(0.5)" onfocusout="ensureNumber(this.id,0.5)"/>
+
+<input type="number" onkeyup="validateBBox(this.id,2)" onkeypress="return setKPFlag(event)" min="1" max="10" step="0.01" id="BB" value="1" onfocus="setDefault(1)" onfocusout="ensureNumber(this.id,1)"/>
